@@ -29,8 +29,8 @@ const validateRegistration = [
      .withMessage('Last name is required'),
         body('role')
         .optional()
-        .isIn(['admin', 'user'])
-        .withMessage('Role must be either admin or user'),
+        .isIn(['user', 'seller'])
+        .withMessage('Role must be either user or seller'),
      responseWithValidationErrors
 ]
 
