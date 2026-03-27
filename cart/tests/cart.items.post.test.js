@@ -17,6 +17,9 @@ jest.mock('../src/middleware/validation.middleware', () => ({
     cartItemValidationRules: [
         (req, res, next) => next(),
     ],
+    cartItemUpdateValidationRules: [
+        (req, res, next) => next(),
+    ],
 }));
 
 jest.mock('../src/models/cart.model', () => {

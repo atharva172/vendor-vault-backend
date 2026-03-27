@@ -7,7 +7,7 @@ const router = express.Router();
 
 
 router.post('/items',Validation.cartItemValidationRules, authMiddleware.createAuthMiddleware(['user']),  cartController.AddItemToCart) 
-router.patch('/items/:productId',Validation.cartItemValidationRules, authMiddleware.createAuthMiddleware(['user']), cartController.UpdateCartItem)
+router.patch('/items/:productId', Validation.cartItemUpdateValidationRules, authMiddleware.createAuthMiddleware(['user']), cartController.UpdateCartItem)
 router.get('/', authMiddleware.createAuthMiddleware(['user']), cartController.GetCart)
 router.delete('/items/:productId', authMiddleware.createAuthMiddleware(['user']), cartController.DeleteCartItem)
 router.delete('/', authMiddleware.createAuthMiddleware(['user']), cartController.ClearCart)

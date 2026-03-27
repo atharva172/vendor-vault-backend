@@ -19,6 +19,13 @@ const cartItemValidationRules = [
     validateCartItem
 ];
 
+const cartItemUpdateValidationRules = [
+    body('qty')
+        .notEmpty().withMessage('qty is required')
+        .isInt({ min: 1 }).withMessage('qty must be a positive integer'),
+    validateCartItem
+];
 module.exports = {
-    cartItemValidationRules
+    cartItemValidationRules,
+    cartItemUpdateValidationRules
 }
