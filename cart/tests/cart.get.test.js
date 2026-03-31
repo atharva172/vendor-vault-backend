@@ -48,15 +48,22 @@ describe('GET /api/cart', () => {
         expect(response.body.message).toBe('Authentication token is missing');
     });
 
-    it('returns 404 when cart is not found for user', async () => {
+    it('returns empty cart when cart is not found for user', async () => {
         Cart.findOne.mockResolvedValue(null);
 
         const response = await request(app)
             .get('/api/cart')
             .set('Authorization', 'Bearer valid-token');
 
-        expect(response.status).toBe(404);
-        expect(response.body.message).toBe('Cart not found');
+        expect(response.status).toBe(200);
+        expect(response.body.cart).toEqual({
+            user: '507f1f77bcf86cd799439011',
+            items: [],
+        });
+        expect(response.body.totals).toEqual({
+            totalItems: 0,
+            totalQuantity: 0,
+        });
         expect(Cart.findOne).toHaveBeenCalledWith({ user: '507f1f77bcf86cd799439011' });
     });
 

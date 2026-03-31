@@ -2,6 +2,36 @@
 const Cart = require('../models/cart.model');
 const mongoose = require('mongoose');
 
+async function GetCart(req, res) {
+	try{
+		const userId = req.user.id;
+		const cart = await Cart.findOne({ user: userId });
+		if (!cart) {
+			return res.status(200).json({
+				cart: {
+					user: userId,
+					items: [],
+				},
+				totals: {
+					totalItems: 0,
+					totalQuantity: 0,
+				},
+			});
+		}
+		const totalItems = cart.items.length;
+		const totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+
+		return res.status(200).json({
+			cart,
+			totals: {
+				totalItems,
+				totalQuantity
+			},
+		});
+	} catch (error) {
+		return res.status(500).json({ message: 'Failed to retrieve cart' });
+	}
+}
 
 async function AddItemToCart(req, res) {
     try {
@@ -88,27 +118,7 @@ async function UpdateCartItem(req, res) {
 	}
 }
 
-async function GetCart(req, res) {
-	try{
-		const userId = req.user.id;
-		const cart = await Cart.findOne({ user: userId });
-		if (!cart) {
-			return res.status(404).json({ message: 'Cart not found' });
-		}
-		const totalItems = cart.items.length;
-		const totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
 
-		return res.status(200).json({
-			cart,
-			totals: {
-				totalItems,
-				totalQuantity
-			},
-		});
-	} catch (error) {
-		return res.status(500).json({ message: 'Failed to retrieve cart' });
-	}
-}
 
 async function DeleteCartItem(req, res) {
 	try{

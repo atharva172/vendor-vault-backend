@@ -30,7 +30,11 @@ const productSchema = new mongoose.Schema({
                 thumbnail: String,
                 id: String,
              }
-            ]
+            ],
+            stock:{
+                type: Number,
+                required: true,
+            }
 })
 
 productSchema.index({ title: 'text', description: 'text' });
