@@ -8,6 +8,6 @@ router.post("/", authMiddleware.createAuthMiddleware(['user']), validatorMiddlew
 router.get("/:id", authMiddleware.createAuthMiddleware(['user']), orderController.getOrderById);
 router.get("/me", authMiddleware.createAuthMiddleware(['user']), orderController.getMyOrders);
 router.patch("/:id/address", authMiddleware.createAuthMiddleware(['user']), validatorMiddleware.validateAddressUpdate, orderController.updateOrderAddress);
-router.post("/:id/cancel", authMiddleware.createAuthMiddleware(['user']), orderController.cancelOrder);
+router.post("/:id/cancel", authMiddleware.createAuthMiddleware(['user', 'admin']), orderController.cancelOrder);
 
 module.exports = router;

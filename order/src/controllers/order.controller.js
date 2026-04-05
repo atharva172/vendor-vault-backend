@@ -5,6 +5,10 @@ const axios = require('axios');
 const createOrder = async (req, res) => {
     try {
         const user = req.user;
+        const userId = user?.id || user?._id;
+        if (!userId) {
+            return res.status(401).json({ message: 'Invalid authentication token payload' });
+        }
         const token = req.cookies?.token || req.headers?.authorization?.split(' ')[1];
         const cartResponse = await axios.get(`http://localhost:3002/api/cart`, {
             headers: {
@@ -31,7 +35,10 @@ const createOrder = async (req, res) => {
                 throw new Error(`Product ${products[index].name} is out of stock`);
             }
 
-            const product = products.find(p => p._id === item.productId);
+            const product = products[index];
+            if (!product?.price?.amount || !product?.price?.currency) {
+                throw new Error(`Invalid product pricing for product ${item.productId}`);
+            }
             const itemTotal = product.price.amount * item.quantity;
             priceAmount += itemTotal;
             return {
@@ -45,15 +52,17 @@ const createOrder = async (req, res) => {
         });
 
        const order = new orderModel({
-            userId: user._id,
+          user: userId,
             items: orderItems,
             status: 'pending',
-            totalPrice: {
+            totalprice: {
                 amount: priceAmount,
                 currency: products[0].price.currency, // Assuming all products have the same currency
             },
             shippingAddress: req.body.shippingAddress,
         });
+
+        await order.save();
 
         res.status(201).json({ order });
     } catch (error) {
@@ -70,7 +79,8 @@ const getOrderById = async (req, res) => {
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
-        if (String(order.userId) !== String(req.user.id)) {
+        const ownerId = String(order.user || order.userId);
+        if (ownerId !== String(req.user.id)) {
             return res.status(403).json({ message: 'Forbidden: You can only access your own orders' });
         }
         res.status(200).json(order);
@@ -85,7 +95,7 @@ const getMyOrders = async (req, res) => {
         const userId = req.user.id;
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-        const query = { userId };
+        const query = { user: userId };
 
         const totalOrders = await orderModel.countDocuments(query);
         const orders = await orderModel
