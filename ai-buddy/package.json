@@ -1,0 +1,28 @@
+{
+  "name": "ai-buddy",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm run dev",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@langchain/core": "^1.1.39",
+    "@langchain/google-genai": "^2.1.26",
+    "@langchain/langgraph": "^1.2.7",
+    "axios": "^1.14.0",
+    "cookie": "^1.1.1",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.0",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.4.1",
+    "socket.io": "^4.8.3",
+    "zod": "^4.3.6"
+  }
+}
