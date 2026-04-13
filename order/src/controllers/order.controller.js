@@ -1,5 +1,6 @@
 const orderModel = require('../models/order.model');
 const axios = require('axios');
+const { publishToQueue } = require('../broker/broker');
 
 
 const createOrder = async (req, res) => {
@@ -63,6 +64,9 @@ const createOrder = async (req, res) => {
         });
 
         await order.save();
+
+        // Publish order created event to RabbitMQ
+        await publishToQueue('ORDER_SELLER-DASHBOARD.ORDER_CREATED', { order });
 
         res.status(201).json({ order });
     } catch (error) {

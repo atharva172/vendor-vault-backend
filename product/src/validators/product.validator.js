@@ -39,6 +39,12 @@ const createProductValidators = [
       }
       return true;
     }),
+    body('stock')
+    .notEmpty()
+    .withMessage('stock is required')
+    .bail()
+    .isInt({ gt: -1 })
+    .withMessage('stock must be a non-negative integer'),
     validateRequest,
 ];
 

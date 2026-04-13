@@ -1,10 +1,10 @@
-const { default: mongoose } = require('mongoose');
+const { mongoose } = require('mongoose');
 const productModel = require('../models/product.model');
 const { uploadImage } = require('../services/imagekit.service');
-
+const {publishToQueue} = require('../broker/broker');
 const createProduct = async (req, res) => {
 	try {
-		const { title, description, amount, currency } = req.body;
+		const { title, description, amount, currency, stock } = req.body;
 		const seller = req.user?.id;
 
 		if (!seller) {
@@ -26,8 +26,17 @@ const createProduct = async (req, res) => {
 				amount: Number(amount),
 				currency: currency || 'INR',
 			},
+			stock: Number(stock),
 			seller,
 			images: uploadedImages,
+		});
+
+		await publishToQueue('PRODUCT_SELLER-DASHBOARD.PRODUCT_CREATED', createdProduct);
+		await publishToQueue('PRODUCT_NOTIFICATION.PRODUCT_CREATED', {
+			email: req.user.email,
+			username: req.user.username,
+			productId: createdProduct._id,
+			sellerId: seller,
 		});
 
 		return res.status(201).json({

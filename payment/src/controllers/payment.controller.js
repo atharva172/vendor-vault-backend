@@ -1,6 +1,7 @@
 const paymentModel = require('../models/payment.model');
 const axios = require('axios');
 const { validatePaymentVerification } = require('razorpay/dist/utils/razorpay-utils');
+const {publishToQueue} = require('../broker/broker');
 
 require('dotenv').config();
 const Razorpay = require('razorpay');
@@ -133,6 +134,15 @@ async function createPayment(req, res) {
             },
         });
 
+        await publishToQueue('PAYMENT_SELLER-DASHBOARD.PAYMENT_CREATED', payment); 
+        await publishToQueue('PAYMENT_NOTIFICATION.PAYMENT_INITIATED', {
+            email: req.user.email,
+            paymentId: payment._id,
+            orderId: payment.order,
+            amount: payment.price.amount,
+            currency: payment.price.currency,
+        });
+
         return res.status(201).json({
             message: 'Payment created successfully',
             payment: {
@@ -146,6 +156,7 @@ async function createPayment(req, res) {
                 status: payment.status,
             },
         });
+
          
     }catch (err) {
         const status = err?.response?.status || 500;
@@ -196,9 +207,25 @@ async function verifyPayment(req, res) {
         payment.signature = razorpay_signature;
         await payment.save();
 
+        await publishToQueue('PAYMENT_NOTIFICATION.PAYMENT_CREATED', {
+                email: payment?.user?.email,
+                paymentId: payment._id,
+                orderId: payment.order,
+                amount: payment.price.amount,
+                currency: payment.price.currency,
+            })
+
+        await publishToQueue('PAYMENT_SELLER-DASHBOARD.PAYMENT_UPDATED', payment);
+
         return res.status(200).json({ message: 'Payment verified successfully' });
     } catch (err) {
         console.error('Error verifying payment:', err);
+
+        await publishToQueue('PAYMENT_NOTIFICATION.PAYMENT_VERIFICATION_FAILED', {
+            email: payment?.user?.email,
+            orderId: razorpay_order_id,
+            paymentId: razorpay_payment_id,
+        })
         return res.status(500).json({ message: 'Internal server error' });
     }
 

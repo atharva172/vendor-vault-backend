@@ -21,7 +21,7 @@ const { uploadImage } = require('../src/services/imagekit.service');
 
 describe('POST /api/products', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   it('should create a product with uploaded images', async () => {
@@ -64,6 +64,7 @@ describe('POST /api/products', () => {
       .field('amount', '1999')
       .field('currency', 'INR')
       .field('seller', '64f0a1c2d3e4f5a6b7c8d9e0')
+      .field('stock', '16')
       .attach('images', 'tests/fixtures/test-image.txt')
       .attach('images', 'tests/fixtures/test-image.txt');
 
@@ -74,6 +75,7 @@ describe('POST /api/products', () => {
       expect.objectContaining({
         title: 'Keyboard',
         description: 'Mechanical keyboard',
+        stock: 16,
         seller: '64f0a1c2d3e4f5a6b7c8d9e0',
         price: {
           amount: 1999,
@@ -98,7 +100,11 @@ describe('POST /api/products', () => {
   it('should return 400 when required fields are missing', async () => {
     const response = await request(app)
       .post('/api/products')
-      .field('title', 'Keyboard');
+      .field('title', 'Keyboard')
+      .field('currency', 'INR')
+      .field('seller', '64f0a1c2d3e4f5a6b7c8d9e0')
+      .field('stock', '16')
+      .attach('images', 'tests/fixtures/test-image.txt');
 
     expect(response.status).toBe(400);
     expect(response.body.message).toBe('Validation failed');
@@ -121,7 +127,8 @@ describe('POST /api/products', () => {
       .field('amount', '1999')
       .field('currency', 'INR')
       .field('seller', '64f0a1c2d3e4f5a6b7c8d9e0')
-      .attach('images', 'tests/fixtures/test-image.txt');
+      .attach('images', 'tests/fixtures/test-image.txt')
+      .field('stock', '16');
 
     expect(response.status).toBe(500);
     expect(response.body.message).toBe('Failed to create product');

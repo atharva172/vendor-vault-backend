@@ -2,6 +2,7 @@ const userModel = require('../models/user.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const redisClient = require('../db/redis');
+const { publishToQueue } = require('../broker/broker');
 
 
 async function register(req, res){
@@ -27,7 +28,19 @@ async function register(req, res){
         },
         role: role || 'user'
     });
-    
+
+    // Publish user registration event to RabbitMQ
+    await Promise.all([
+        publishToQueue('AUTH_NOTIFICATION.USER_CREATED', {
+            userId: newUser._id,
+            username: newUser.username,
+            email: newUser.email,
+            fullName: newUser.fullName,
+            registeredAt: new Date()
+        }),
+        publishToQueue('AUTH_SELLER-DASHBOARD.USER_CREATED', newUser)
+    ]);
+
     const token = jwt.sign({ 
         userId: newUser._id,
         username: newUser.username,
