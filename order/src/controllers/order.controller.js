@@ -11,7 +11,7 @@ const createOrder = async (req, res) => {
             return res.status(401).json({ message: 'Invalid authentication token payload' });
         }
         const token = req.cookies?.token || req.headers?.authorization?.split(' ')[1];
-        const cartResponse = await axios.get(`http://localhost:3002/api/cart`, {
+        const cartResponse = await axios.get(`vendor-vault-ALB-1065200681.ap-south-1.elb.amazonaws.com/api/cart`, {
             headers: {
                 Cookie: req.headers.cookie,
                 Authorization: `Bearer ${token}`,
@@ -19,7 +19,7 @@ const createOrder = async (req, res) => {
         });
 
         const products = await Promise.all(cartResponse.data.cart.items.map(async (item) => {
-            return (await axios.get(`http://localhost:3001/api/products/${item.productId}`, {
+            return (await axios.get(`vendor-vault-ALB-1065200681.ap-south-1.elb.amazonaws.com/api/products/${item.productId}`, {
                 headers: {
                     Cookie: req.headers.cookie,
                     Authorization: `Bearer ${token}`,

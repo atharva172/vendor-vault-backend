@@ -91,7 +91,7 @@ async function createPayment(req, res) {
     }
 
     try{
-         const orderResponse = await axios.get(`http://localhost:3003/api/orders/${orderId}`, {
+         const orderResponse = await axios.get(`vendor-vault-ALB-1065200681.ap-south-1.elb.amazonaws.com/api/orders/${orderId}`, {
              headers: {
                  'Authorization': `Bearer ${token}`
              }
